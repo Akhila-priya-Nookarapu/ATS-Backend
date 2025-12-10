@@ -1,85 +1,136 @@
-# FlowTrack ATS – Job Application Tracking System API
+FlowTrack ATS – Job Application Tracking System API
 
-Backend project by **Akhila Priya Nookarapu** for an **Applicant Tracking System (ATS)** with:
+Backend project by Akhila Priya Nookarapu for a modern Applicant Tracking System (ATS) supporting:
 
-- User roles (Candidate, Recruiter, Hiring Manager)
-- Job posting and job applications
-- Application workflow stages (Applied → Screening → Interview → Offer → Hired/Rejected)
-- Application history tracking (who changed what and when)
-- JWT-based authentication & basic Role-Based Access Control (RBAC)
+User roles: Candidate, Recruiter, Hiring Manager
 
-> Repository: https://github.com/Akhila-priya-Nookarapu/ATS-Backend
+Job postings & job applications
 
----
+Multi-stage application workflow
+(Applied → Screening → Interview → Offer → Hired/Rejected)
 
-## Architecture Overview
+Full application history tracking (who changed what and when)
 
-This project is a **FastAPI** backend using **SQLite + SQLAlchemy ORM**.
+JWT authentication + Role-Based Access Control (RBAC)
 
-### Main Components
+Repository: https://github.com/Akhila-priya-Nookarapu/ATS-Backend
 
-- **FastAPI app**: `app/main.py`
-  - Mounts routers: `auth_router`, `jobs_router`, `applications_router`, `history_router` (if you have it)
-  - Health endpoint: `GET /health`
-- **Database layer**: `app/database.py`
-  - Uses SQLite database: e.g. `ats.db`
-  - `SessionLocal` and `Base` defined here
-- **Models**: `app/models.py`
-  - `User` – Candidate / Recruiter / Hiring Manager
-  - `Company`
-  - `Job`
-  - `Application`
-  - `ApplicationHistory`
-- **Auth & Security**: `app/auth.py`
-  - Password hashing with `passlib[bcrypt]`
-  - JWT creation & verification with `python-jose`
-  - `get_current_user` dependency
-  - `require_role(...)` for RBAC
-- **Routers**:
-  - `app/routers/auth_router.py`
-  - `app/routers/jobs_router.py`
-  - `app/routers/applications_router.py`
-  - `app/routers/history_router.py` (if you created one)
-- **Services**:
-  - `app/services/application_service.py` – contains logic for applying to jobs and updating stages
+🚀 Architecture Overview
 
----
+This is a backend-only project built using FastAPI, SQLite, and SQLAlchemy ORM.
 
-## Application Workflow
+Major Components
+Component	Description
+FastAPI App (app/main.py)	Initializes the server & loads routers
+Database (app/database.py)	Creates engine, session & Base ORM
+Models (app/models.py)	User, Company, Job, Application, ApplicationHistory
+Auth (app/auth.py)	JWT Tokens, password hashing, role validation
+Routers	/auth, /jobs, /applications, /history
+Services	Business logic (application workflow, history tracking, email placeholder)
+🔁 Application Workflow
+1️⃣ Candidate registers & logs in
 
-1. **Candidate registers and logs in**
-   - `POST /auth/register`
-   - `POST /auth/login` → returns `access_token`
-2. **Recruiter creates a job**
-   - `POST /jobs/` (recruiter only)
-3. **Candidate applies to job**
-   - `POST /applications/?job_id={job_id}`
-4. **Recruiter reviews and updates stage**
-   - `PATCH /applications/{application_id}/stage?new_stage=Screening`
-   - Possible stages:
-     - `Applied`
-     - `Screening`
-     - `Interview`
-     - `Offer`
-     - `Hired`
-     - `Rejected`
-5. **History is recorded**
-   - Each change is stored in `ApplicationHistory`:
-     - `old_stage`
-     - `new_stage`
-     - `changed_by_id`
-     - `changed_at`
-6. **History can be viewed**
-   - Recruiter: `GET /history/application/{application_id}`
-   - Candidate: `GET /history/me/{application_id}`
+POST /auth/register
 
----
+POST /auth/login → returns JWT Access Token
 
-## State Transition Diagram (Workflow)
+2️⃣ Recruiter creates a job
 
-Valid state transitions (example):
+POST /jobs/
 
-```text
+3️⃣ Candidate applies to a job
+
+POST /applications/?job_id={id}
+
+4️⃣ Recruiter updates application stage
+
+Example:
+
+PATCH /applications/1/stage?new_stage=Screening
+
+5️⃣ Every stage change is recorded
+
+Stored in ApplicationHistory:
+
+old_stage
+
+new_stage
+
+changed_by_id
+
+changed_at
+
+6️⃣ History endpoints
+
+Recruiter: GET /history/application/{id}
+
+Candidate: GET /history/me/{id}
+
+🔄 Application State Machine (Workflow Diagram)
 [Applied] ─> [Screening] ─> [Interview] ─> [Offer] ─> [Hired]
-       └──────────────────────────────┐
-        └───────────────────────────> [Rejected]
+       └──────────────────────────────────────────────┐
+        └────────────────────────────────────────────> [Rejected]
+
+🧩 Role-Based Access Control (RBAC)
+Endpoint	Candidate	Recruiter	Hiring Manager
+Register/Login	✅	✅	✅
+Create Job	❌	✅	✅
+Apply to Job	✅	❌	❌
+View Applications for Job	❌	✅	✅
+Change Application Stage	❌	✅	❌
+View Own Applications	✅	❌	❌
+View Full History	❌	✅	❌
+🗄️ Database Schema (ERD)
+
+Add your image to the repository (already uploaded).
+Now display it in README:
+
+## 📌 Database Schema (ERD)
+![ERD](./erd.png)
+
+
+It will render like this:
+
+🛠️ Setup Instructions (Development Environment)
+1️⃣ Clone the repository
+git clone https://github.com/Akhila-priya-Nookarapu/ATS-Backend
+cd ATS-Backend
+
+2️⃣ Create virtual environment
+python -m venv venv
+
+3️⃣ Activate environment
+
+Windows:
+
+venv\Scripts\activate
+
+4️⃣ Install dependencies
+pip install -r requirements.txt
+
+5️⃣ Run the FastAPI server
+uvicorn app.main:app --reload
+
+6️⃣ Open API Docs
+
+http://127.0.0.1:8000/docs
+
+🧪 Postman Collection
+
+Include your exported .json here:
+
+postman_collection.json
+
+🎥 Demo Video (3–5 minutes)
+
+Your demo should cover:
+
+Candidate login
+
+Recruiter creating a job
+
+Candidate applying
+
+Recruiter moving the application through stages
+
+View history timeline
