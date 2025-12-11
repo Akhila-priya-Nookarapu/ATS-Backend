@@ -1,136 +1,161 @@
-FlowTrack ATS – Job Application Tracking System API
+FlowTrack ATS – Applicant Tracking System Backend (FastAPI)
 
-Backend project by Akhila Priya Nookarapu for a modern Applicant Tracking System (ATS) supporting:
+Backend project built by Akhila Priya Nookarapu as a modern Applicant Tracking System (ATS) providing:
 
-User roles: Candidate, Recruiter, Hiring Manager
+🧑‍💼 User roles: Candidate, Recruiter, Hiring Manager
 
-Job postings & job applications
+📝 Job posting system
 
-Multi-stage application workflow
-(Applied → Screening → Interview → Offer → Hired/Rejected)
+📩 Candidates can apply to jobs
 
-Full application history tracking (who changed what and when)
+🔁 Application workflow stages
 
-JWT authentication + Role-Based Access Control (RBAC)
+🕒 Complete application history tracking
 
-Repository: https://github.com/Akhila-priya-Nookarapu/ATS-Backend
+🔐 JWT Authentication
 
-🚀 Architecture Overview
+🔒 Role-Based Access Control (RBAC)
 
-This is a backend-only project built using FastAPI, SQLite, and SQLAlchemy ORM.
+🗂️ SQLite + SQLAlchemy ORM backend
 
-Major Components
-Component	Description
-FastAPI App (app/main.py)	Initializes the server & loads routers
-Database (app/database.py)	Creates engine, session & Base ORM
-Models (app/models.py)	User, Company, Job, Application, ApplicationHistory
-Auth (app/auth.py)	JWT Tokens, password hashing, role validation
-Routers	/auth, /jobs, /applications, /history
-Services	Business logic (application workflow, history tracking, email placeholder)
-🔁 Application Workflow
-1️⃣ Candidate registers & logs in
-
-POST /auth/register
-
-POST /auth/login → returns JWT Access Token
-
-2️⃣ Recruiter creates a job
-
-POST /jobs/
-
-3️⃣ Candidate applies to a job
-
-POST /applications/?job_id={id}
-
-4️⃣ Recruiter updates application stage
-
-Example:
-
-PATCH /applications/1/stage?new_stage=Screening
-
-5️⃣ Every stage change is recorded
-
-Stored in ApplicationHistory:
-
-old_stage
-
-new_stage
-
-changed_by_id
-
-changed_at
-
-6️⃣ History endpoints
-
-Recruiter: GET /history/application/{id}
-
-Candidate: GET /history/me/{id}
-
-🔄 Application State Machine (Workflow Diagram)
-[Applied] ─> [Screening] ─> [Interview] ─> [Offer] ─> [Hired]
-       └──────────────────────────────────────────────┐
-        └────────────────────────────────────────────> [Rejected]
-
-🧩 Role-Based Access Control (RBAC)
-Endpoint	Candidate	Recruiter	Hiring Manager
-Register/Login	✅	✅	✅
+🚀 Live Features Implemented
+Feature	Candidate	Recruiter	Hiring Manager
+Register & Login	✅	✅	✅
 Create Job	❌	✅	✅
 Apply to Job	✅	❌	❌
-View Applications for Job	❌	✅	✅
-Change Application Stage	❌	✅	❌
-View Own Applications	✅	❌	❌
-View Full History	❌	✅	❌
+See Applications for Job	❌	✅	❌
+Update Application Stage	❌	✅	❌
+View Candidate’s Own Applications	✅	❌	❌
+View Application History	❌	✅	❌
+🧱 Architecture Overview
+Project Structure
+app/
+ ├── main.py
+ ├── auth.py
+ ├── deps.py
+ ├── database.py
+ ├── models.py
+ ├── schemas.py
+ ├── routers/
+ │    ├── auth_router.py
+ │    ├── jobs_router.py
+ │    ├── applications_router.py
+ │    ├── application_history_router.py
+ └── services/
+      ├── application_service.py
+      ├── state_machine.py
+      ├── email_service.py
+
+Tech Used
+
+FastAPI
+
+SQLite
+
+SQLAlchemy ORM
+
+JWT (python-jose)
+
+Passlib (bcrypt hashing)
+
+Uvicorn
+
+🔐 Authentication
+
+Login returns a JWT access token
+
+Protected routes require:
+
+Authorization: Bearer <token>
+
+🔁 Application Workflow
+
+Each job application passes through these states:
+
+Applied → Screening → Interview → Offer → Hired
+                           ↓
+                        Rejected
+
+
+Every change is stored in ApplicationHistory along with timestamp & changed_by user.
+
 🗄️ Database Schema (ERD)
 
-Add your image to the repository (already uploaded).
-Now display it in README:
+Add this file to repo as erd.png then reference it:
 
-## 📌 Database Schema (ERD)
 ![ERD](./erd.png)
 
-
-It will render like this:
-
-🛠️ Setup Instructions (Development Environment)
-1️⃣ Clone the repository
+📚 API Endpoints
+Auth
+Method	Endpoint	Description
+POST	/auth/register	Register a new user
+POST	/auth/login	Login & get JWT
+Jobs
+Method	Endpoint	Role	Description
+GET	/jobs/	All	List jobs
+POST	/jobs/	Recruiter	Create job
+PUT	/jobs/{job_id}	Recruiter	Update job
+DELETE	/jobs/{job_id}	Recruiter	Delete job
+Applications
+Method	Endpoint	Role	Description
+POST	/applications/?job_id=	Candidate	Apply for job
+PATCH	/applications/{id}/stage	Recruiter	Update stage
+GET	/applications/me	Candidate	View my applications
+GET	/applications/job/{job_id}	Recruiter	View all applications for a job
+GET	/applications/recruiter/all	Recruiter	View all applications system-wide
+History
+Method	Endpoint	Role	Description
+GET	/history/application/{id}	Recruiter	Application history
+GET	/history/me/{id}	Candidate	Candidate’s own history
+⚙️ Setup Instructions
+1️⃣ Clone Repository
 git clone https://github.com/Akhila-priya-Nookarapu/ATS-Backend
 cd ATS-Backend
 
-2️⃣ Create virtual environment
+2️⃣ Create Virtual Environment
 python -m venv venv
 
-3️⃣ Activate environment
-
-Windows:
-
+3️⃣ Activate Environment (Windows)
 venv\Scripts\activate
 
-4️⃣ Install dependencies
+4️⃣ Install Dependencies
 pip install -r requirements.txt
 
-5️⃣ Run the FastAPI server
+5️⃣ Run FastAPI Server
 uvicorn app.main:app --reload
 
 6️⃣ Open API Docs
-
 http://127.0.0.1:8000/docs
 
-🧪 Postman Collection
+🧪 Postman / Thunder Client Collection
 
-Include your exported .json here:
+Download and import this:
 
-postman_collection.json
+➡️ postman_collection.json
+(Already included in your repo)
 
-🎥 Demo Video (3–5 minutes)
+🎥 Demo Video Instructions
 
-Your demo should cover:
+Record a 3–5 minute video showing:
 
-Candidate login
+Register candidate & recruiter
 
-Recruiter creating a job
+Login and copy JWT tokens
 
-Candidate applying
+Recruiter → Create job
 
-Recruiter moving the application through stages
+Candidate → Apply for job
 
-View history timeline
+Recruiter → Move stages (Screening → Interview → Offer)
+
+Show application history updates
+
+Show ERD + README
+
+Tools you can use:
+
+OBS Studio
+
+Loom
+
+Windows Xbox Recorder (Win + Alt + R)
