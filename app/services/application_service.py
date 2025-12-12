@@ -10,6 +10,14 @@ from ..models import (
     User,
 )
 
+import redis
+import json
+
+# -----------------------------
+# CONNECT TO REDIS MESSAGE QUEUE
+# -----------------------------
+redis_client = redis.StrictRedis(host="127.0.0.1", port=6379, db=0)
+
 
 class ApplicationService:
 
@@ -54,7 +62,7 @@ class ApplicationService:
         db.add(application)
         db.flush()  # get application.id
 
-        # 5) Create history record (no old_stage for first time)
+        # 5) Create history record
         history = ApplicationHistory(
             application_id=application.id,
             old_stage=None,
@@ -63,9 +71,19 @@ class ApplicationService:
         )
         db.add(history)
 
-        # 6) Save
         db.commit()
         db.refresh(application)
+
+        # -----------------------------
+        # 6) PUSH EMAIL TASK TO REDIS
+        # -----------------------------
+        task = {
+            "email": candidate.email,
+            "subject": "Application Received",
+            "message": f"Your application for Job ID {job_id} has been received."
+        }
+        redis_client.lpush("email_queue", json.dumps(task))
+
         return application
 
     @staticmethod
@@ -84,11 +102,9 @@ class ApplicationService:
             )
 
         old_stage = application.stage
-
-        # 2) Update stage
         application.stage = new_stage
 
-        # 3) Add history record
+        # 2) Save history
         history = ApplicationHistory(
             application_id=application.id,
             old_stage=old_stage,
@@ -96,10 +112,18 @@ class ApplicationService:
             changed_by_id=recruiter.id,
         )
         db.add(history)
-
-        # 4) Save
         db.commit()
         db.refresh(application)
 
-        # Can return application or empty dict (you used {})
+        # -----------------------------
+        # 3) SEND EMAIL NOTIFICATION
+        # -----------------------------
+        task = {
+            "email": f"candidate-{application.candidate_id}@example.com",
+            "subject": "Application Status Updated",
+            "message": f"Your application stage changed from {old_stage} to {new_stage}."
+        }
+
+        redis_client.lpush("email_queue", json.dumps(task))
+
         return {}
