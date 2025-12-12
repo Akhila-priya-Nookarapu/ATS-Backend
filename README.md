@@ -145,6 +145,35 @@ Download and import this:
 ➡️ ATS-Backend-API.json
 
 
+### Running Background Worker
+Open terminal #1:
+└─ Run Redis:
+redis-server.exe --port 6379
+
+Open terminal #2:
+└─ Run FastAPI:
+uvicorn app.main:app --reload
+
+Open terminal #3:
+└─ Run background worker:
+python background_worker.py
+
+
+📬 Email Notification Workflow (Message Queue Demo)
+When a candidate applies, an email task is pushed into Redis:
+{
+  "email": "candidate@gmail.com",
+  "subject": "Application Received",
+  "message": "Your application for Job ID X has been received."
+}
+The background worker consumes it:
+🔔 New message received!
+📧 Sending Email...
+To: candidate@gmail.com
+Subject: Application Received
+Message: Your application for Job ID X has been received.
+✅ Email sent!
+
 🎥 Demo Video Instructions
 
 Record a 3–5 minute video showing:
