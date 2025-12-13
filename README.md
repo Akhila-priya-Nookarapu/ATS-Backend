@@ -174,28 +174,3 @@ Subject: Application Received
 Message: Your application for Job ID X has been received.
 ✅ Email sent!
 
-🎥 Demo Video Instructions
-
-Record a 3–5 minute video showing:
-
-Register candidate & recruiter
-
-Login and copy JWT tokens
-
-Recruiter → Create job
-
-Candidate → Apply for job
-
-Recruiter → Move stages (Screening → Interview → Offer)
-
-Show application history updates
-
-Show ERD + README
-
-Tools you can use:
-
-OBS Studio
-
-Loom
-
-Windows Xbox Recorder (Win + Alt + R)
